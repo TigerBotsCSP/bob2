@@ -4,10 +4,15 @@
 
 package frc.robot;
 
-import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
+import java.io.IOException;
+import java.nio.file.Path;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -30,11 +35,21 @@ public class Robot extends TimedRobot {
    * for any
    * initialization code.
    */
+  String trajectoryJSON = "paths/Straight.wpilib.json";
+  Trajectory trajectory = new Trajectory();
+  
   @Override
   public void robotInit() {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our
     // autonomous chooser on the dashboard.
+    try {
+      Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+      trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+   } catch (IOException ex) {
+      DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+   }
+
     m_robotContainer = new RobotContainer();
   }
 
@@ -48,6 +63,9 @@ public class Robot extends TimedRobot {
    * and
    * SmartDashboard integrated updating.
    */
+  public PIDController m_pid = new PIDController(0.01, .1, 0);
+  public double m_currentRotation = 0;
+
   @Override
   public void robotPeriodic() {
     // Runs the Scheduler. This is responsible for polling buttons, adding
@@ -98,7 +116,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     // Set the intaker as going in
-    m_robotContainer.m_arm.toggleIntaker();
+    //m_robotContainer.m_arm.toggleIntaker();
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
@@ -108,33 +126,41 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
   }
-
+  
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    // Move the arm based on joystick values
-    m_robotContainer.m_arm.setRotation(m_robotContainer.m_armController.getLeftY());
+    //if (!m_robotContainer.m_arm.m_positioning) {
+    //  double value = m_pid.calculate(m_robotContainer.m_arm.m_rotation.getEncoder().getPosition(), m_currentRotation);
+    //  m_robotContainer.m_arm.setRotation(value * .3);
+    //}
 
+    // Move the arm based on joystick values
+    //m_robotContainer.m_arm.setRotation(m_robotContainer.m_armController.getLeftY());
+    
     // Change intaker direction
-    if (m_robotContainer.m_armController.getAButtonPressed()) {
-      m_robotContainer.m_arm.toggleIntaker();
-    }
+    //if (m_robotContainer.m_armController.getAButtonPressed()) {
+    //  m_robotContainer.m_arm.toggleIntaker();
+    //}
 
     // One button shooting
-    if (m_robotContainer.m_armController.getBButtonPressed()) {
-      m_robotContainer.m_arm.shootOut();
-    }
+    //if (m_robotContainer.m_armController.getBButtonPressed()) {
+    //  m_robotContainer.m_arm.shootOut();
+    //}
 
     // Positioning
-    if (m_robotContainer.m_armController.getYButtonPressed()) {
-      m_robotContainer.m_arm.position();
-    }
+    //if (m_robotContainer.m_armController.getYButtonPressed()) {
+    //  m_robotContainer.m_arm.position();
+    //}
 
     // Data
-    SmartDashboard.putNumber("Encoder Position",
-        m_robotContainer.m_arm.m_rotation.getEncoder().getPosition());
-    SmartDashboard.putNumber("Encoder Velocity",
-        m_robotContainer.m_arm.m_rotation.getAbsoluteEncoder(Type.kDutyCycle).getVelocity());
+    //SmartDashboard.putNumber("Encoder Position",
+    //    m_robotContainer.m_arm.m_rotation.getEncoder().getPosition());
+    //SmartDashboard.putNumber("Encoder Velocity",
+    //    m_robotContainer.m_arm.m_rotation.getAbsoluteEncoder(Type.kDutyCycle).getVelocity());
+
+    //    m_currentRotation = m_robotContainer.m_arm.m_rotation.getEncoder().getPosition();
+
   }
 
   @Override
